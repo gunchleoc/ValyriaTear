@@ -55,6 +55,8 @@ const uint8_t SAVE_MODE_FADING_OUT       = 6;
 const uint8_t SAVE_MODE_NO_VALID_SAVES   = 7;
 //@}
 
+const uint32_t CHARACTERS_SHOWN_SLOTS = 4;
+
 SaveMode::SaveMode(bool save_mode, uint32_t x_position, uint32_t y_position) :
     GameMode(MODE_MANAGER_SAVE_MODE),
     _current_state(SAVE_MODE_LOADING),
@@ -85,7 +87,7 @@ SaveMode::SaveMode(bool save_mode, uint32_t x_position, uint32_t y_position) :
     else
         _title_textbox.SetDisplayText(UTranslate("Load Game"));
 
-    for(uint32_t i = 0; i < 4; ++i) {
+    for(uint32_t i = 0; i < CHARACTERS_SHOWN_SLOTS; ++i) {
         _character_window[i].Create(450.0f, 100.0f);
         _character_window[i].Show();
     }
@@ -125,7 +127,7 @@ SaveMode::SaveMode(bool save_mode, uint32_t x_position, uint32_t y_position) :
 
     // Initialize the auto-save option box
     _load_auto_save_optionbox.SetPosition(512.0f, 384.0f);
-    _load_auto_save_optionbox.SetDimensions(250.0f, 200.0f, 1, 3, 1, 3);
+    _load_auto_save_optionbox.SetDimensions(300.0f, 200.0f, 1, 3, 1, 3);
     _load_auto_save_optionbox.SetTextStyle(TextStyle("title22"));
 
     _load_auto_save_optionbox.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -211,10 +213,9 @@ SaveMode::~SaveMode()
     _left_window.Destroy();
     _title_window.Destroy();
 
-    for(uint32_t i = 0; i < 4; ++i) {
+    for(uint32_t i = 0; i < CHARACTERS_SHOWN_SLOTS; ++i) {
         _character_window[i].Destroy();
     }
-
 }
 
 void SaveMode::Reset()
@@ -410,7 +411,7 @@ void SaveMode::DrawPostEffects()
     case SAVE_MODE_LOADING:
         _left_window.Draw(); // draw a panel on the left for the file list
         if(_file_list.GetSelection() > -1) {
-            for(uint32_t i = 0; i < 4; i++) {
+            for(uint32_t i = 0; i < CHARACTERS_SHOWN_SLOTS; i++) {
                 _character_window[i].Draw();
             }
         }
@@ -464,8 +465,8 @@ bool SaveMode::_LoadGame(const std::string& filename)
         // Create a new map mode, and fade out and in
         ModeManager->PopAll();
         try {
-            // TODO: Save and restore stamina at load time
-            MapMode *MM = new MapMode(GlobalManager->GetMapDataFilename(),
+            // Save and restore stamina at load time
+            MapMode* MM = new MapMode(GlobalManager->GetMapDataFilename(),
                                       GlobalManager->GetMapScriptFilename(),
                                       GlobalManager->GetSaveStamina(),
                                       false);
@@ -497,7 +498,7 @@ void SaveMode::_ClearSaveData(bool selected_file_exists)
     _time_textbox.ClearText();
     _drunes_textbox.ClearText();
     _location_image.Clear();
-    for (uint32_t i = 0; i < 4; ++i)
+    for (uint32_t i = 0; i < CHARACTERS_SHOWN_SLOTS; ++i)
         _character_window[i].SetCharacter(nullptr);
 }
 
@@ -582,13 +583,13 @@ bool SaveMode::_PreviewGame(const std::string& filename)
     file.OpenTable("characters");
     std::vector<uint32_t> char_ids;
     file.ReadUIntVector("order", char_ids);
-    GlobalCharacter *character[4];
+    GlobalCharacter* character[CHARACTERS_SHOWN_SLOTS];
 
     // Loads only up to the first four slots (Visible battle characters)
-    for(uint32_t i = 0; i < 4 && i < char_ids.size(); ++i) {
+    for(uint32_t i = 0; i < CHARACTERS_SHOWN_SLOTS; ++i) {
         // Create a new GlobalCharacter object using the provided id
         // This loads all of the character's "static" data, such as their name, etc.
-        character[i] = new GlobalCharacter(char_ids[i], false);
+        character[i] = nullptr;
 
         if(!file.DoesTableExist(char_ids[i]))
             continue;
@@ -596,6 +597,7 @@ bool SaveMode::_PreviewGame(const std::string& filename)
         file.OpenTable(char_ids[i]);
 
         // Read in all of the character's stats data
+        character[i] = new GlobalCharacter(char_ids[i], false);
         character[i]->SetExperienceLevel(file.ReadUInt("experience_level"));
         character[i]->SetExperiencePoints(file.ReadUInt("experience_points"));
 
@@ -618,7 +620,7 @@ bool SaveMode::_PreviewGame(const std::string& filename)
     file.CloseTable(); // save_game1
     file.CloseFile();
 
-    for(uint32_t i = 0; i < 4 && i < char_ids.size(); ++i) {
+    for(uint32_t i = 0; i < CHARACTERS_SHOWN_SLOTS; ++i) {
         _character_window[i].SetCharacter(character[i]);
     }
 
@@ -745,7 +747,7 @@ SmallCharacterWindow::~SmallCharacterWindow()
     delete _character;
 }
 
-void SmallCharacterWindow::SetCharacter(GlobalCharacter *character)
+void SmallCharacterWindow::SetCharacter(GlobalCharacter* character)
 {
     delete _character;
     _character = character;
@@ -773,11 +775,8 @@ void SmallCharacterWindow::SetCharacter(GlobalCharacter *character)
                                " / " + NumberToString(_character->GetMaxSkillPoints()));
 
     _character_data.SetText(char_data, TextStyle("text20"));
-} // void SmallCharacterWindow::SetCharacter(GlobalCharacter *character)
+}
 
-
-
-// Draw the window to the screen
 void SmallCharacterWindow::Draw()
 {
     // Call parent Draw method, if failed pass on fail result
