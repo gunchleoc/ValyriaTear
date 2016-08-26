@@ -923,7 +923,7 @@ void BattleMode::_AutoCharacterCommand(BattleCharacter* character)
     autoTarget.SetTarget(character, GLOBAL_TARGET_FOE);
 
     GlobalSkill* attackSkill = character->GetSkills()[0];
-    
+
     auto global_character = character->GetGlobalCharacter();
     if(global_character->GetWeaponEquipped()) {
         auto wpnSkills = global_character->GetWeaponSkills();
@@ -938,7 +938,7 @@ void BattleMode::_AutoCharacterCommand(BattleCharacter* character)
         if (handSkills->size() > 0)
             attackSkill = (*handSkills)[0];
     }
-    
+
     if (attackSkill == nullptr) {
         PRINT_WARNING << "No valid attack skill was found for character: "
             << vt_utils::MakeStandardString(character->GetGlobalCharacter()->GetName()) << std::endl;
@@ -952,8 +952,6 @@ void BattleMode::_AutoCharacterCommand(BattleCharacter* character)
     _actor_state_paused = false;
 }
 
-
-
 uint32_t BattleMode::_NumberEnemiesAlive() const
 {
     uint32_t enemy_count = 0;
@@ -965,7 +963,6 @@ uint32_t BattleMode::_NumberEnemiesAlive() const
     return enemy_count;
 }
 
-
 uint32_t BattleMode::_NumberValidEnemies() const
 {
     uint32_t enemy_count = 0;
@@ -976,7 +973,6 @@ uint32_t BattleMode::_NumberValidEnemies() const
     return enemy_count;
 }
 
-
 uint32_t BattleMode::_NumberCharactersAlive() const
 {
     uint32_t character_count = 0;
@@ -986,7 +982,6 @@ uint32_t BattleMode::_NumberCharactersAlive() const
     }
     return character_count;
 }
-
 
 void BattleMode::_DrawBackgroundGraphics()
 {
@@ -1008,7 +1003,6 @@ void BattleMode::_DrawForegroundGraphics()
 
     GetScriptSupervisor().DrawForeground();
 }
-
 
 void BattleMode::_DrawSprites()
 {
@@ -1096,8 +1090,6 @@ void BattleMode::_DrawGUI()
     if((_state == BATTLE_STATE_VICTORY || _state == BATTLE_STATE_DEFEAT))
         _finish_supervisor->Draw();
 }
-
-
 
 void BattleMode::_DrawBottomMenu()
 {
