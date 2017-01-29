@@ -840,6 +840,13 @@ void BindModeCode()
 
         luabind::module(vt_script::ScriptManager->GetGlobalState(), "vt_battle")
         [
+            luabind::class_<BattleItem>("BattleItem")
+            .def("ExecuteBattleFunction", &BattleItem::ExecuteBattleFunction)
+            .def("GetGlobalItem", &BattleItem::GetGlobalItem)
+        ];
+
+        luabind::module(vt_script::ScriptManager->GetGlobalState(), "vt_battle")
+        [
             luabind::class_<CommandSupervisor>("CommandSupervisor")
         ];
 
